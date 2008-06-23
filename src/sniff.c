@@ -96,3 +96,18 @@ kira_set_receive_buffer(int fd,
 	if (ret != 0)
 		fprintf(stderr, "nu am putut seta optiunile pentru socket\n");
 }
+
+int
+kira_device_get_arptype(void)
+{
+	struct ifreq ifr;
+
+	memset(&ifr, 0, sizeof(ifr));
+	strncpy(ifr.ifr_name, mon_ifname, sizeof(ifr.ifr_name));
+
+	if (ioctl(mon_fd, SIOCGIFHWADDR, &ifr) < 0) {
+		fprintf(stderr, "nu am putut determina tipul ARP\n");
+	}
+	DEBUG("ARPTYPE %d\n", ifr.ifr_hwaddr.sa_family);
+	return ifr.ifr_hwaddr.sa_family;
+}

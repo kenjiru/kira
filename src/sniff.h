@@ -33,4 +33,7 @@ void
 kira_set_receive_buffer(int fd, 
 						int sockbufsize);
 
+int
+kira_device_get_arptype(void);
+
 #endif /*SNIFF_H_*/
