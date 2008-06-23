@@ -27,8 +27,8 @@ int mon_fd;
 char* mon_ifname;
 
 // variabile de configurare
-char* ifname = "wlan0"; // interfata wireless
-int recv_buffer_size = 6750000; // dim. bufferului
-int sleep_time = 1000;
+char* ifname; // interfata wireless
+int recv_buffer_size; // dim. bufferului
+int sleep_time;
 
 #endif /*KIRA_H_*/
