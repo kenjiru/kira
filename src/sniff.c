@@ -16,7 +16,83 @@ kira_open_packet_socket(char* 	devname,
 
 	mon_fd = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
 	if (mon_fd < 0)
-		err(1, "nu am putut crea socketul");
+		fprintf(stderr, "nu am putut crea socketul");
+	
+	// determina id-ul interfetei wireless
+	ifindex = kira_device_index(mon_fd, devname);
+	
+	struct sockaddr_ll sall;
+	sall.sll_ifindex = ifindex;
+	sall.sll_family = AF_PACKET;
+	sall.sll_protocol = htons(ETH_P_ALL);
+	
+	ret = bind(mon_fd, (struct sockaddr*)&sall, sizeof(sall));
+	if (ret != 0)
+		fprintf(stderr, "bind a esuat");
+	
+	kira_device_promisc(mon_fd, devname, 1);
+	kira_set_receive_buffer(mon_fd, recv_buffer_size);
 
 	return mon_fd;
+}
+
+int
+kira_device_index(int fd, 
+				  const char *devname)
+{
+	struct ifreq req;
+
+	strncpy(req.ifr_name, devname, IFNAMSIZ);
+	req.ifr_addr.sa_family = AF_INET;
+
+	if (ioctl(fd, SIOCGIFINDEX, &req) < 0)
+		fprintf(stderr, "nu am gasit interfata %s", devname);
+
+	if (req.ifr_ifindex < 0) {
+		fprintf(stderr, "interface %s not found", devname);
+	}
+	DEBUG("index %d\n", req.ifr_ifindex);
+	return req.ifr_ifindex;
+}
+
+void
+kira_device_promisc(int fd, 
+					const char *devname, 
+					int on)
+{
+	struct ifreq req;
+
+	strncpy(req.ifr_name, devname, IFNAMSIZ);
+	req.ifr_addr.sa_family = AF_INET;
+
+	if (ioctl(fd, SIOCGIFFLAGS, &req) < 0) {
+		fprintf(stderr, "nu am putut seta interfata %s", devname);
+	}
+
+	req.ifr_flags |= IFF_UP;
+
+	if (on)
+		req.ifr_flags |= IFF_PROMISC;
+	else
+		req.ifr_flags &= ~IFF_PROMISC;
+
+	if (ioctl(fd, SIOCSIFFLAGS, &req) < 0) {
+		fprintf(stderr, "nu am putut seta modul promisc pentru interfata %s", devname);
+	}
+}
+
+void
+kira_set_receive_buffer(int fd, 
+						int sockbufsize)
+{
+	int ret;
+
+	/* the maximum allowed value is set by the rmem_max sysctl */
+	FILE* PF = fopen("/proc/sys/net/core/rmem_max", "w");
+	fprintf(PF, "%d", sockbufsize);
+	fclose(PF);
+
+	ret = setsockopt (fd, SOL_SOCKET, SO_RCVBUF, &sockbufsize, sizeof(sockbufsize));
+	if (ret != 0)
+		fprintf(stderr, "nu am putut seta optiunile pentru socket");
 }
