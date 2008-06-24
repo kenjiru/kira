@@ -39,9 +39,10 @@ main(int argc, char** argv)
 		err(1, "Nu sunteti in modul monitor.\n");
 	}
 	
-	if(kira_get_frequency(fd, devname, &freq))
-		err(1, "Nu am putut determina frecventa canalului!");
+	kira_get_frequency(fd, devname, &freq);
 	printf("Frecventa canalului este: %f \n", freq);
+	
+	kira_print_freq_info(fd, devname);
 	
 	return 0;
 	

@@ -157,6 +157,100 @@ kira_get_frequency(int fd,
 	return -1; 
 } 
 
+int
+kira_get_range_info(int fd,
+		const char *devname,
+		struct iw_range *range)
+{
+	struct iwreq wrq;
+	char buffer[sizeof(struct iw_range) * 2];
+
+	wrq.u.data.pointer = (caddr_t) buffer;
+	wrq.u.data.length = sizeof(buffer);
+	wrq.u.data.flags = 0;
+	
+	strncpy(wrq.ifr_name, devname, IFNAMSIZ);
+	if(ioctl(fd, SIOCGIWRANGE, &wrq) < 0) {
+		err(1, "nu am putut determina range-ul\n");
+		return -1;
+	}
+	
+	memcpy((char *) range, buffer, sizeof(struct iw_range));
+	
+	DEBUG("range->we_version_compiled=%d\n", range->we_version_compiled);
+	
+	if(wrq.u.data.length < 300) {
+		// versiune veche de wireless tools, mai veche de 10
+		range->we_version_compiled = 9;
+    }
+
+	// daca versiunea e mai mica de 15, nu mergem mai departe
+	if(range->we_version_compiled < 15) {
+		err(1, "versiune wireless tools nesuportata\n");
+		return -1;
+	}
+	
+	return 0;
+}
+
+int
+kira_print_freq_info(int fd,
+		char *devname)
+{
+	struct iw_range	range;
+	
+	double freq;
+	int	i;
+	char buffer[128];
+
+	if(kira_get_range_info(fd, devname, &range) < 0) {
+		err(1, "nu am putut determina frecventele\n");
+		return -1;
+	}
+	
+	DEBUG("range->num_channels=%d\n", range.num_channels);
+	DEBUG("range->num_frequency=%d\n", range.num_frequency);
+	
+	if(range.num_frequency > 0) {
+		printf("sunt disponibile %d canale; avand frecventele:\n", range.num_channels);
+		// afiseaza toate canalele si frecventele lor
+		for(i = 0; i < range.num_frequency; i++) {
+			freq = kira_freq2float(range.freq[i]);
+			kira_print_freq_value(buffer, sizeof(buffer), freq);
+			printf("canalul %.2d : %s\n", range.freq[i].i, buffer);
+		}
+	} 
+	
+	return 0;
+}
+
+void
+kira_print_freq_value(char *buffer,
+		int	buflen,
+		double freq)
+{
+	if(freq < KILO)
+		snprintf(buffer, buflen, "%g", freq);
+	else {
+		char	scale;
+		int	divisor;
+
+		if(freq >= GIGA) {
+			scale = 'G';
+			divisor = GIGA;
+		} else {
+			if(freq >= MEGA) {
+				scale = 'M';
+				divisor = MEGA;
+			} else {
+				scale = 'k';
+				divisor = KILO;
+			}
+		}
+		snprintf(buffer, buflen, "%g %cHz", freq / divisor, scale);
+	}
+}
+
 double
 kira_freq2float(struct iw_freq in)
 {

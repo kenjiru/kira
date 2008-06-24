@@ -1,6 +1,11 @@
 #ifndef SNIFF_H_
 #define SNIFF_H_
 
+// cateva constante utile
+#define KILO	1e3
+#define MEGA	1e6
+#define GIGA	1e9
+
 int
 kira_open_packet_socket(char* devname, 
 		size_t 	bufsize,
@@ -35,5 +40,19 @@ kira_get_frequency(int fd,
 
 double
 kira_freq2float(struct iw_freq in);
+
+int
+kira_get_range_info(int fd,
+		const char *devname,
+		struct iw_range *range);
+
+int
+kira_print_freq_info(int fd,
+		char *devname);
+
+void
+kira_print_freq_value(char *buffer,
+		int	buflen,
+		double freq);
 
 #endif /*SNIFF_H_*/
