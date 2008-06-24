@@ -130,3 +130,42 @@ kira_recv_packet(int fd,
 	return recv(fd, buffer, bufsize, MSG_DONTWAIT);
 }
 
+int 
+kira_get_frequency(int fd, 
+		const char* devname, 
+		double* freq) 
+{ 
+	struct iwreq wrq; 
+	 
+	// determina numele dispozitivului 
+	strncpy(wrq.ifr_name, devname, IFNAMSIZ);
+ 	if(ioctl(fd, SIOCGIWNAME, &wrq) < 0) {
+		err(1, "nu am gasit extensiile wireless\n");  
+		return -1;
+	}
+
+	// determina frecventa
+	strncpy(wrq.ifr_name, devname, IFNAMSIZ);
+	if(ioctl(fd, SIOCGIWFREQ, &wrq) < 0) {
+		err(1, "nu am putut determina frecventa canalului\n");
+		return -1;
+	} else { 
+		*freq = kira_freq2float(wrq.u.freq);
+		return 0; 
+    } 
+	
+	return -1; 
+} 
+
+double
+kira_freq2float(struct iw_freq in)
+{
+	// varianta fara libm
+	int		i;
+	double	res = (double) in.m;
+	
+	for(i = 0; i < in.e; i++)
+		res *= 10;
+	
+	return res;
+}

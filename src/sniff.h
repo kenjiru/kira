@@ -28,4 +28,12 @@ kira_recv_packet(int fd,
 		unsigned char* buffer, 
 		size_t bufsize);
 
+int 
+kira_get_frequency(int fd, 
+		const char* devname, 
+		double* freq);
+
+double
+kira_freq2float(struct iw_freq in);
+
 #endif /*SNIFF_H_*/

@@ -31,14 +31,19 @@ main(int argc, char** argv)
 	
 	fd = kira_open_packet_socket(devname, sizeof(buffer), recv_buffer_size);
 	if (fd < 0)
-		err(1, "nu am putut deschide socketul\n");
+		err(1, "Nu am putut deschide socketul\n");
 	
 	arphrd = kira_device_get_arptype(fd, devname);
 	if (arphrd != ARPHRD_IEEE80211_PRISM &&
 	    arphrd != ARPHRD_IEEE80211_RADIOTAP) {
-		err(1, "Nu sunteti in modul monitor."
-			   "Va rog sa folositi headerele radiotap sau prism2.\n");
+		err(1, "Nu sunteti in modul monitor.\n");
 	}
+	
+	if(kira_get_frequency(fd, devname, &freq))
+		err(1, "Nu am putut determina frecventa canalului!");
+	printf("Frecventa canalului este: %f \n", freq);
+	
+	return 0;
 	
 	while ((len = kira_recv_packet(fd, buffer, sizeof(buffer)))) {
 		if (len == -1) {
