@@ -20,10 +20,12 @@ kira_set_receive_buffer(int fd,
 		int sockbufsize);
 
 int
-kira_device_get_arptype(void);
+kira_device_get_arptype(int fd, 
+		const char *devname);
 
 inline int
-kira_recv_packet(unsigned char* buffer, 
+kira_recv_packet(int fd, 
+		unsigned char* buffer, 
 		size_t bufsize);
 
 #endif /*SNIFF_H_*/

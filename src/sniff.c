@@ -20,31 +20,28 @@ kira_open_packet_socket(char* devname,
 		size_t 	bufsize,
 		int 	recv_buffer_size)
 {
-	int ret;
+	int fd;
 	int ifindex;
 
-	mon_ifname = devname;
-
-	mon_fd = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
-	if (mon_fd < 0)
+	fd = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
+	if (fd < 0)
 		fprintf(stderr, "nu am putut crea socketul\n");
 	
 	// determina id-ul interfetei wireless
-	ifindex = kira_device_index(mon_fd, devname);
+	ifindex = kira_device_index(fd, devname);
 	
 	struct sockaddr_ll sall;
 	sall.sll_ifindex = ifindex;
 	sall.sll_family = AF_PACKET;
 	sall.sll_protocol = htons(ETH_P_ALL);
 	
-	ret = bind(mon_fd, (struct sockaddr*)&sall, sizeof(sall));
-	if (ret != 0)
+	if (bind(fd, (struct sockaddr*)&sall, sizeof(sall)) != 0)
 		fprintf(stderr, "bind a esuat\n");
 	
-	kira_device_promisc(mon_fd, devname, 1);
-	kira_set_receive_buffer(mon_fd, recv_buffer_size);
+	kira_device_promisc(fd, devname, 1);
+	kira_set_receive_buffer(fd, recv_buffer_size);
 
-	return mon_fd;
+	return fd;
 }
 
 int
@@ -109,14 +106,15 @@ kira_set_receive_buffer(int fd,
 }
 
 int
-kira_device_get_arptype(void)
+kira_device_get_arptype(int fd, 
+		const char *devname)
 {
 	struct ifreq ifr;
 
 	memset(&ifr, 0, sizeof(ifr));
-	strncpy(ifr.ifr_name, mon_ifname, sizeof(ifr.ifr_name));
+	strncpy(ifr.ifr_name, devname, sizeof(ifr.ifr_name));
 
-	if (ioctl(mon_fd, SIOCGIFHWADDR, &ifr) < 0) {
+	if (ioctl(fd, SIOCGIFHWADDR, &ifr) < 0) {
 		fprintf(stderr, "nu am putut determina tipul ARP\n");
 	}
 	DEBUG("ARPTYPE %d\n", ifr.ifr_hwaddr.sa_family);
@@ -124,10 +122,11 @@ kira_device_get_arptype(void)
 }
 
 inline int
-kira_recv_packet(unsigned char* buffer, 
+kira_recv_packet(int fd, 
+		unsigned char* buffer, 
 		size_t bufsize)
 {
-	return recv(mon_fd, buffer, bufsize, MSG_DONTWAIT);
+	return recv(fd, buffer, bufsize, MSG_DONTWAIT);
 }
 
 
