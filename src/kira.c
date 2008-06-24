@@ -1,3 +1,13 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <getopt.h>
+#include <signal.h>
+#include <sys/time.h>
+#include <time.h>
+#include <err.h>
+
 #include "kira.h"
 #include "sniff.h"
 

@@ -1,20 +1,12 @@
 #ifndef KIRA_H_
 #define KIRA_H_
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <getopt.h>
-#include <signal.h>
-#include <sys/time.h>
-#include <time.h>
-#include <err.h>
-
 #include "parse.h"
 
+#define VERSION "0.1"
+
 #ifndef DO_DEBUG
-#define DO_DEBUG 1
+#define DO_DEBUG 0
 #endif
 
 #if DO_DEBUG
@@ -32,6 +24,6 @@ struct packet_info current_packet;
 // variabile de configurare
 char* ifname; // interfata wireless
 int recv_buffer_size; // dim. bufferului
-int sleep_time;
+int sleep_time; // refresh-ul
 
 #endif /*KIRA_H_*/

@@ -21,7 +21,6 @@
 
 #include "ieee80211.h"
 #include "ieee80211_radiotap.h"
-#include "main.h"
 #include "util.h"
 
 u8*

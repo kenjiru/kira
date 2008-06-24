@@ -1,6 +1,8 @@
 #ifndef PARSE_H_
 #define PARSE_H_
 
+#include <sys/types.h>
+
 #define MAC_LEN			6
 
 #define MAX_NODES		255
@@ -53,6 +55,14 @@
 #define PHY_FLAG_G		0x0040
 #define PHY_FLAG_MODE_MASK	0x00f0
 
+#ifndef ARPHRD_IEEE80211_RADIOTAP
+#define ARPHRD_IEEE80211_RADIOTAP 803    /* IEEE 802.11 + radiotap header */
+#endif
+
+#ifndef ARPHRD_IEEE80211_PRISM
+#define ARPHRD_IEEE80211_PRISM 802      /* IEEE 802.11 + Prism2 header  */
+#endif
+
 struct packet_info {
 	/* general */
 	int			pkt_types;	/* bitmask of packet types in this pkt */
@@ -88,19 +98,19 @@ struct packet_info {
 int
 kira_parse_packet(unsigned char* buf, int len);
 
-static int
+int
 kira_parse_prism_header(unsigned char** buf, int len);
 
-static int
+int
 kira_parse_radiotap_header(unsigned char** buf, int len);
 
-static int
+int
 kira_parse_80211_header(unsigned char** buf, int len);
 
-static inline int
+inline int
 kira_parse_llc(unsigned char ** buf, int len);
 
-static int
+int
 kira_parse_ip_header(unsigned char** buf, int len);
 
 #endif /*PARSE_H_*/

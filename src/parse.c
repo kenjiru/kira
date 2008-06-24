@@ -50,7 +50,7 @@ kira_parse_packet(unsigned char* buf, int len)
 	return 1;
 }
 
-static int
+int
 kira_parse_prism_header(unsigned char** buf, int len)
 {
 	wlan_ng_prism2_header* ph;
@@ -121,7 +121,7 @@ kira_parse_prism_header(unsigned char** buf, int len)
 	return len - sizeof(wlan_ng_prism2_header);
 }
 
-static int
+int
 kira_parse_radiotap_header(unsigned char** buf, int len)
 {
 	struct ieee80211_radiotap_header* rh;
@@ -264,7 +264,7 @@ kira_parse_radiotap_header(unsigned char** buf, int len)
 	return len - rh->it_len;
 }
 
-static int
+int
 kira_parse_80211_header(unsigned char** buf, int len)
 {
 	struct ieee80211_hdr* wh;
@@ -433,7 +433,7 @@ kira_parse_80211_header(unsigned char** buf, int len)
 }
 
 
-static inline int
+inline int
 kira_parse_llc(unsigned char ** buf, int len)
 {
 	DEBUG("* parse LLC\n");
@@ -460,7 +460,7 @@ kira_parse_llc(unsigned char ** buf, int len)
 }
 
 
-static int
+int
 kira_parse_ip_header(unsigned char** buf, int len)
 {
 	struct iphdr* ih;
