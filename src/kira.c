@@ -19,25 +19,25 @@ struct packet_info current_packet;
 int
 main(int argc, char** argv)
 {
+	int fd;
 	char* devname = "wlan0";
-	unsigned char buffer[8192];
 	int sleep_time = 1000;
 	int recv_buffer_size = 6750000;
+	unsigned char buffer[8192];
 	int len;
-	int fd;
+	double freq;
 	
 	DEBUG("modul DEBUG activat\n");
 	
 	fd = kira_open_packet_socket(devname, sizeof(buffer), recv_buffer_size);
 	if (fd < 0)
-		fprintf(stderr, "nu am putut deschide socketul\n");
+		err(1, "nu am putut deschide socketul\n");
 	
 	arphrd = kira_device_get_arptype(fd, devname);
 	if (arphrd != ARPHRD_IEEE80211_PRISM &&
 	    arphrd != ARPHRD_IEEE80211_RADIOTAP) {
-		printf("Nu sunteti in modul monitor."
+		err(1, "Nu sunteti in modul monitor."
 			   "Va rog sa folositi headerele radiotap sau prism2.\n");
-		exit(1);
 	}
 	
 	while ((len = kira_recv_packet(fd, buffer, sizeof(buffer)))) {
