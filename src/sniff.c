@@ -111,3 +111,12 @@ kira_device_get_arptype(void)
 	DEBUG("ARPTYPE %d\n", ifr.ifr_hwaddr.sa_family);
 	return ifr.ifr_hwaddr.sa_family;
 }
+
+inline int
+kira_recv_packet(unsigned char* buffer, 
+				 size_t bufsize)
+{
+	return recv(mon_fd, buffer, bufsize, MSG_DONTWAIT);
+}
+
+

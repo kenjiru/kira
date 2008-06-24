@@ -11,6 +11,8 @@
 #include <time.h>
 #include <err.h>
 
+#include "parse.h"
+
 #ifndef DO_DEBUG
 #define DO_DEBUG 1
 #endif
@@ -25,6 +27,7 @@
 int arphrd;
 int mon_fd;
 char* mon_ifname;
+struct packet_info current_packet;
 
 // variabile de configurare
 char* ifname; // interfata wireless

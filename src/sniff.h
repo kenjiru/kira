@@ -36,4 +36,8 @@ kira_set_receive_buffer(int fd,
 int
 kira_device_get_arptype(void);
 
+inline int
+kira_recv_packet(unsigned char* buffer, 
+				 size_t bufsize);
+
 #endif /*SNIFF_H_*/
