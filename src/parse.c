@@ -7,7 +7,7 @@
 
 #include "kira.h"
 #include "parse.h"
-//#include "util.h"
+#include "util.h"
 
 #include "prism_header.h"
 #include "ieee80211_radiotap.h"
@@ -288,6 +288,8 @@ kira_parse_80211_header(unsigned char** buf, int len)
 
 	DEBUG("wlan_type %x - type %x - stype %x\n", wh->frame_control, wh->frame_control & IEEE80211_FCTL_FTYPE, wh->frame_control & IEEE80211_FCTL_STYPE );
 
+	DEBUG("%s\n", get_packet_type_name(wh->frame_control));
+
 	bssid = kira_ieee80211_get_bssid(wh, len);
 
 	switch (current_packet.wlan_type & IEEE80211_FCTL_FTYPE) {
@@ -410,12 +412,15 @@ kira_parse_80211_header(unsigned char** buf, int len)
 
 	if (sa != NULL) {
 		memcpy(current_packet.wlan_src, sa, MAC_LEN);
+		DEBUG("SA    %s\n", ether_sprintf(sa));
 	}
 	if (da != NULL) {
 		memcpy(current_packet.wlan_dst, da, MAC_LEN);
+		DEBUG("DA    %s\n", ether_sprintf(da));
 	}
 	if (bssid!=NULL) {
 		memcpy(current_packet.wlan_bssid, bssid, MAC_LEN);
+		DEBUG("BSSID %s\n", ether_sprintf(bssid));
 	}
 
 	/* only data frames contain more info, otherwise stop parsing */
@@ -467,6 +472,8 @@ kira_parse_ip_header(unsigned char** buf, int len)
 
 	ih = (struct iphdr*)*buf;
 
+	DEBUG("*** IP SRC: %s\n", ip_sprintf(ih->saddr));
+	DEBUG("*** IP DST: %s\n", ip_sprintf(ih->daddr));
 	current_packet.ip_src = ih->saddr;
 	current_packet.ip_dst = ih->daddr;
 	current_packet.pkt_types |= PKT_TYPE_IP;
