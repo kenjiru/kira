@@ -7,10 +7,12 @@
 
 #include "kira.h"
 #include "parse.h"
+//#include "util.h"
 
 #include "prism_header.h"
 #include "ieee80211_radiotap.h"
 #include "ieee80211.h"
+#include "ieee80211_util.h"
 
 int
 kira_parse_packet(unsigned char* buf, int len)
@@ -276,6 +278,7 @@ kira_parse_80211_header(unsigned char** buf, int len)
 		return -1;
 
 	wh = (struct ieee80211_hdr*)*buf;
+	hdrlen = kira_ieee80211_get_hdrlen(wh->frame_control);
 
 	if (len < hdrlen)
 		return -1;
@@ -284,6 +287,8 @@ kira_parse_80211_header(unsigned char** buf, int len)
 	current_packet.wlan_type = (wh->frame_control & (IEEE80211_FCTL_FTYPE | IEEE80211_FCTL_STYPE));
 
 	DEBUG("wlan_type %x - type %x - stype %x\n", wh->frame_control, wh->frame_control & IEEE80211_FCTL_FTYPE, wh->frame_control & IEEE80211_FCTL_STYPE );
+
+	bssid = kira_ieee80211_get_bssid(wh, len);
 
 	switch (current_packet.wlan_type & IEEE80211_FCTL_FTYPE) {
 	case IEEE80211_FTYPE_DATA:
@@ -352,6 +357,10 @@ kira_parse_80211_header(unsigned char** buf, int len)
 		case IEEE80211_STYPE_BEACON:
 			current_packet.pkt_types |= PKT_TYPE_BEACON;
 			current_packet.wlan_tsf = whm->u.beacon.timestamp;
+			kira_ieee802_11_parse_elems(whm->u.beacon.variable,
+				len - sizeof(struct ieee80211_mgmt) - 4 /* FCS */, &current_packet);
+			DEBUG("ESSID %s \n", current_packet.wlan_essid );
+			DEBUG("CHAN %d \n", current_packet.wlan_channel );
 			if (whm->u.beacon.capab_info & WLAN_CAPABILITY_IBSS)
 				current_packet.wlan_mode = WLAN_MODE_IBSS;
 			else if (whm->u.beacon.capab_info & WLAN_CAPABILITY_ESS)
@@ -363,6 +372,10 @@ kira_parse_80211_header(unsigned char** buf, int len)
 		case IEEE80211_STYPE_PROBE_RESP:
 			current_packet.pkt_types |= PKT_TYPE_PROBE;
 			current_packet.wlan_tsf = whm->u.beacon.timestamp;
+			kira_ieee802_11_parse_elems(whm->u.beacon.variable,
+				len - sizeof(struct ieee80211_mgmt) - 4 /* FCS */, &current_packet);
+			DEBUG("ESSID %s \n", current_packet.wlan_essid );
+			DEBUG("CHAN %d \n", current_packet.wlan_channel );
 			if (whm->u.beacon.capab_info & WLAN_CAPABILITY_IBSS)
 				current_packet.wlan_mode = WLAN_MODE_IBSS;
 			else if (whm->u.beacon.capab_info & WLAN_CAPABILITY_ESS)
@@ -373,6 +386,9 @@ kira_parse_80211_header(unsigned char** buf, int len)
 
 		case IEEE80211_STYPE_PROBE_REQ:
 			current_packet.pkt_types |= PKT_TYPE_PROBE;
+			kira_ieee802_11_parse_elems(whm->u.probe_req.variable,
+				len - 24 - 4 /* FCS */,
+				&current_packet);
 			current_packet.wlan_mode |= WLAN_MODE_PROBE;
 			break;
 
@@ -390,6 +406,16 @@ kira_parse_80211_header(unsigned char** buf, int len)
 			break;
 		}
 		break;
+	}
+
+	if (sa != NULL) {
+		memcpy(current_packet.wlan_src, sa, MAC_LEN);
+	}
+	if (da != NULL) {
+		memcpy(current_packet.wlan_dst, da, MAC_LEN);
+	}
+	if (bssid!=NULL) {
+		memcpy(current_packet.wlan_bssid, bssid, MAC_LEN);
 	}
 
 	/* only data frames contain more info, otherwise stop parsing */
