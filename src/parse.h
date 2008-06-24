@@ -96,21 +96,27 @@ struct packet_info {
 };
 
 int
-kira_parse_packet(unsigned char* buf, int len);
+kira_parse_80211_header(unsigned char** buf, 
+		int len);
 
 int
-kira_parse_prism_header(unsigned char** buf, int len);
-
-int
-kira_parse_radiotap_header(unsigned char** buf, int len);
-
-int
-kira_parse_80211_header(unsigned char** buf, int len);
+kira_parse_ip_header(unsigned char** buf, 
+		int len);
 
 inline int
-kira_parse_llc(unsigned char ** buf, int len);
+kira_parse_llc(unsigned char ** buf, 
+		int len);
 
 int
-kira_parse_ip_header(unsigned char** buf, int len);
+kira_parse_packet(unsigned char* buf, 
+		int len);
+
+int
+kira_parse_prism_header(unsigned char** buf, 
+		int len);
+
+int
+kira_parse_radiotap_header(unsigned char** buf, 
+		int len);
 
 #endif /*PARSE_H_*/

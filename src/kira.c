@@ -8,8 +8,19 @@
 #include <time.h>
 #include <err.h>
 
-#include "kira.h"
 #include "sniff.h"
+#include "util.h"
+
+// variabile globale
+int arphrd;
+int mon_fd;
+char* mon_ifname;
+struct packet_info current_packet;
+
+// variabile de configurare
+char* ifname; // interfata wireless
+int recv_buffer_size; // dim. bufferului
+int sleep_time; // refresh-ul
 
 int
 main(int argc, char** argv)

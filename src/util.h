@@ -1,10 +1,17 @@
 #ifndef UTIL_H_
 #define UTIL_H_
 
-struct pkt_names {
-	char c;
-	const char* name;
-};
+#define VERSION "0.1"
+
+#ifndef DO_DEBUG
+#define DO_DEBUG 0
+#endif
+
+#if DO_DEBUG
+#define DEBUG(...) printf(__VA_ARGS__)
+#else
+#define DEBUG(...)
+#endif
 
 #define DATA_NAME_INDEX(_i) (((_i) & IEEE80211_FCTL_STYPE)>>4)
 #define MGMT_NAME_INDEX(_i) (((_i) & IEEE80211_FCTL_STYPE)>>4)
@@ -15,8 +22,14 @@ struct pkt_names {
 #define MAC_EMPTY(_mac) (!_mac[0] && !_mac[1] && !_mac[2] && !_mac[3] && !_mac[4] && !_mac[5])
 #define TOGGLE_BIT(_x, _m) (_x) = (_x) & (_m) ? (_x) & ~(_m) : (_x) | (_m)
 
+struct pkt_names {
+	char c;
+	const char* name;
+};
+
 void
-dump_packet(const unsigned char* buf, int len);
+dump_packet(const unsigned char* buf, 
+		int len);
 
 const char*
 ether_sprintf(const unsigned char *mac);
@@ -25,10 +38,13 @@ const char*
 ip_sprintf(const unsigned int ip);
 
 void
-convert_string_to_mac(const char* string, unsigned char* mac);
+convert_string_to_mac(const char* string, 
+		unsigned char* mac);
 
 inline int
-normalize(float val, int max_val, int max);
+normalize(float val, 
+		int max_val, 
+		int max);
 
 #define normalize_db(_val, _max) \
 	normalize((_val) - 30, 70, (_max))

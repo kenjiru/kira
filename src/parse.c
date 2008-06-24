@@ -5,7 +5,6 @@
 #include <netinet/ip.h>
 #include <netinet/udp.h>
 
-#include "kira.h"
 #include "parse.h"
 #include "util.h"
 
@@ -14,8 +13,12 @@
 #include "ieee80211.h"
 #include "ieee80211_util.h"
 
+extern int arphrd;
+extern struct packet_info current_packet;
+
 int
-kira_parse_packet(unsigned char* buf, int len)
+kira_parse_packet(unsigned char* buf, 
+		int len)
 {
 	if (arphrd == ARPHRD_IEEE80211_PRISM) {
 		len = kira_parse_prism_header(&buf, len);
@@ -51,7 +54,8 @@ kira_parse_packet(unsigned char* buf, int len)
 }
 
 int
-kira_parse_prism_header(unsigned char** buf, int len)
+kira_parse_prism_header(unsigned char** buf, 
+		int len)
 {
 	wlan_ng_prism2_header* ph;
 
@@ -122,7 +126,8 @@ kira_parse_prism_header(unsigned char** buf, int len)
 }
 
 int
-kira_parse_radiotap_header(unsigned char** buf, int len)
+kira_parse_radiotap_header(unsigned char** buf, 
+		int len)
 {
 	struct ieee80211_radiotap_header* rh;
 	__le32 present; /* the present bitmap */
@@ -265,7 +270,8 @@ kira_parse_radiotap_header(unsigned char** buf, int len)
 }
 
 int
-kira_parse_80211_header(unsigned char** buf, int len)
+kira_parse_80211_header(unsigned char** buf, 
+		int len)
 {
 	struct ieee80211_hdr* wh;
 	struct ieee80211_mgmt* whm;
@@ -434,7 +440,8 @@ kira_parse_80211_header(unsigned char** buf, int len)
 
 
 inline int
-kira_parse_llc(unsigned char ** buf, int len)
+kira_parse_llc(unsigned char ** buf, 
+		int len)
 {
 	DEBUG("* parse LLC\n");
 
@@ -461,7 +468,8 @@ kira_parse_llc(unsigned char ** buf, int len)
 
 
 int
-kira_parse_ip_header(unsigned char** buf, int len)
+kira_parse_ip_header(unsigned char** buf, 
+		int len)
 {
 	struct iphdr* ih;
 

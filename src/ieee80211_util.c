@@ -17,8 +17,6 @@
 #include <string.h>
 
 #include "ieee80211_util.h"
-#include "kira.h"
-
 #include "ieee80211.h"
 #include "ieee80211_radiotap.h"
 #include "util.h"

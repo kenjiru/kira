@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "kira.h"
 #include "util.h"
 #include "ieee80211.h"
 
@@ -51,7 +50,9 @@ struct pkt_names data_names[] = {
 };
 
 inline int
-normalize(float oval, int max_val, int max) {
+normalize(float oval, 
+		int max_val, 
+		int max) {
 	int val;
 	val= (oval / max_val) * max;
 	if (val > max) /* cap if still bigger */
@@ -65,7 +66,8 @@ normalize(float oval, int max_val, int max) {
 
 
 void
-dump_packet(const unsigned char* buf, int len)
+dump_packet(const unsigned char* buf, 
+		int len)
 {
 	int i;
 	for (i = 0; i < len; i++) {
@@ -101,7 +103,8 @@ ip_sprintf(const unsigned int ip)
 
 
 void
-convert_string_to_mac(const char* string, unsigned char* mac)
+convert_string_to_mac(const char* string, 
+		unsigned char* mac)
 {
 	int c;
 	for(c = 0; c < 6 && string; c++) {
