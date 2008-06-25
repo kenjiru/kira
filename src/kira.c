@@ -15,6 +15,7 @@
 // variabile globale
 int arphrd;
 struct packet_info current_packet;
+short current_channel;
 
 int
 main(int argc, char** argv)
@@ -36,13 +37,18 @@ main(int argc, char** argv)
 	arphrd = kira_device_get_arptype(fd, devname);
 	if (arphrd != ARPHRD_IEEE80211_PRISM &&
 	    arphrd != ARPHRD_IEEE80211_RADIOTAP) {
-		err(1, "Nu sunteti in modul monitor.\n");
+		err(1, "Nu este activat modul monitor.\n");
 	}
 	
 	kira_get_frequency(fd, devname, &freq);
 	printf("Frecventa canalului este: %f \n", freq);
 	
 	kira_print_freq_info(fd, devname);
+	
+	kira_set_channel(fd, devname, 2);
+	
+	kira_get_frequency(fd, devname, &freq);
+		printf("Frecventa canalului este: %f \n", freq);
 	
 	return 0;
 	

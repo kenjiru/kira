@@ -4,7 +4,7 @@
 #define VERSION "0.1"
 
 #ifndef DO_DEBUG
-#define DO_DEBUG 0
+#define DO_DEBUG 1
 #endif
 
 #if DO_DEBUG

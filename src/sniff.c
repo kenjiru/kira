@@ -13,8 +13,7 @@
 #include "sniff.h"
 #include "util.h"
 
-extern int mon_fd;
-extern char* mon_ifname;
+extern short current_channel;
 
 int
 kira_open_packet_socket(char* devname, 
@@ -137,24 +136,46 @@ kira_get_frequency(int fd,
 { 
 	struct iwreq wrq; 
 	 
-	// determina numele dispozitivului 
-	strncpy(wrq.ifr_name, devname, IFNAMSIZ);
- 	if(ioctl(fd, SIOCGIWNAME, &wrq) < 0) {
-		err(1, "nu am gasit extensiile wireless\n");  
-		return -1;
-	}
-
 	// determina frecventa
 	strncpy(wrq.ifr_name, devname, IFNAMSIZ);
-	if(ioctl(fd, SIOCGIWFREQ, &wrq) < 0) {
+	if(ioctl(fd, SIOCGIWFREQ, &wrq) < 0)
 		err(1, "nu am putut determina frecventa canalului\n");
-		return -1;
-	} else { 
-		*freq = kira_freq2float(wrq.u.freq);
-		return 0; 
-    } 
 	
-	return -1; 
+	*freq = kira_freq2float(wrq.u.freq);
+	return 0; 
+}
+
+int 
+kira_set_channel(int fd, 
+		const char* devname, 
+		short channel) 
+{ 
+	struct iwreq wrq; 
+	struct iw_range	range;
+	struct iw_freq freq;
+	int	i;
+
+	if(kira_get_range_info(fd, devname, &range) < 0)
+		err(1, "nu am putut determina frecventele\n");
+	
+	if(channel > range.num_channels)
+		err(1, "canal inexistent");
+	
+	// determina frecventa corespunzatoare canalului
+	for(i = 0; i < range.num_frequency; i++)
+		if(range.freq[i].i == channel) {
+			freq = range.freq[i];  
+		}
+	 
+	// seteaza frecventa
+	wrq.u.freq = freq;
+	wrq.u.freq.flags = IW_FREQ_FIXED;
+	
+	strncpy(wrq.ifr_name, devname, IFNAMSIZ);
+	if(ioctl(fd, SIOCSIWFREQ, &wrq) < 0)
+		err(1, "nu am putut seta frecventa canalului\n");
+
+	return 0; 
 } 
 
 int
@@ -170,10 +191,8 @@ kira_get_range_info(int fd,
 	wrq.u.data.flags = 0;
 	
 	strncpy(wrq.ifr_name, devname, IFNAMSIZ);
-	if(ioctl(fd, SIOCGIWRANGE, &wrq) < 0) {
+	if(ioctl(fd, SIOCGIWRANGE, &wrq) < 0)
 		err(1, "nu am putut determina range-ul\n");
-		return -1;
-	}
 	
 	memcpy((char *) range, buffer, sizeof(struct iw_range));
 	
@@ -185,10 +204,8 @@ kira_get_range_info(int fd,
     }
 
 	// daca versiunea e mai mica de 15, nu mergem mai departe
-	if(range->we_version_compiled < 15) {
+	if(range->we_version_compiled < 15) 
 		err(1, "versiune wireless tools nesuportata\n");
-		return -1;
-	}
 	
 	return 0;
 }
@@ -203,10 +220,8 @@ kira_print_freq_info(int fd,
 	int	i;
 	char buffer[128];
 
-	if(kira_get_range_info(fd, devname, &range) < 0) {
+	if(kira_get_range_info(fd, devname, &range) < 0)
 		err(1, "nu am putut determina frecventele\n");
-		return -1;
-	}
 	
 	DEBUG("range->num_channels=%d\n", range.num_channels);
 	DEBUG("range->num_frequency=%d\n", range.num_frequency);
@@ -263,3 +278,4 @@ kira_freq2float(struct iw_freq in)
 	
 	return res;
 }
+

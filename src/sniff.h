@@ -38,6 +38,11 @@ kira_get_frequency(int fd,
 		const char* devname, 
 		double* freq);
 
+int 
+kira_set_channel(int fd, 
+		const char* devname, 
+		short channel);
+
 double
 kira_freq2float(struct iw_freq in);
 
