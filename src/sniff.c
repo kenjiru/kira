@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
@@ -9,11 +10,13 @@
 #include <arpa/inet.h>
 #include <linux/wireless.h>
 #include <err.h>
+#include <pthread.h>
 
 #include "sniff.h"
 #include "util.h"
 
 extern short current_channel;
+extern pthread_mutex_t cj_mu;
 
 int
 kira_open_packet_socket(char* devname, 
@@ -227,7 +230,7 @@ kira_print_freq_info(int fd,
 	DEBUG("range->num_frequency=%d\n", range.num_frequency);
 	
 	if(range.num_frequency > 0) {
-		printf("sunt disponibile %d canale; avand frecventele:\n", range.num_channels);
+		printf("Sunt disponibile %d canale; avand frecventele:\n", range.num_channels);
 		// afiseaza toate canalele si frecventele lor
 		for(i = 0; i < range.num_frequency; i++) {
 			freq = kira_freq2float(range.freq[i]);
@@ -279,3 +282,56 @@ kira_freq2float(struct iw_freq in)
 	return res;
 }
 
+void 
+kira_jump_channels(void *thread_data)
+{
+	struct iwreq wrq; 
+	struct iw_range	range;
+	struct iw_freq freq;
+	short num_channels;
+	struct channel_jumper_data *data;  
+	int fd;
+	char *devname;
+	int sleep_time = 3000000;
+	int i;
+	short channel = 0;
+	
+	data = (struct channel_jumper_data*) thread_data;
+	fd = data->fd;
+	devname = data->devname;
+
+	if(kira_get_range_info(fd, devname, &range) < 0)
+		err(1, "nu am putut determina frecventele\n");
+	
+	num_channels = range.num_channels;
+	current_channel = 0;
+	
+	// schimbam canalele
+	while(1) {
+		DEBUG("schimbam canalul %d\n", channel);
+		// incrementam canalul
+		pthread_mutex_lock(&cj_mu);
+		if(current_channel < num_channels)
+			current_channel++;
+		else
+			current_channel = 1;
+		channel = current_channel;
+		pthread_mutex_unlock(&cj_mu);
+		
+		// determinam frecventa corespunzatoare canalului
+		for(i = 0; i < range.num_frequency; i++)
+			if(range.freq[i].i == channel) {
+				freq = range.freq[i];  
+			}
+			 
+		// setam frecventa
+		wrq.u.freq = freq;
+		wrq.u.freq.flags = IW_FREQ_FIXED;
+		
+		strncpy(wrq.ifr_name, devname, IFNAMSIZ);
+		if(ioctl(fd, SIOCSIWFREQ, &wrq) < 0)
+			err(1, "nu am putut seta frecventa canalului\n");
+		
+		usleep(sleep_time);
+	}
+}

@@ -90,9 +90,6 @@ struct packet_info {
 	/* IP */
 	unsigned int		ip_src;
 	unsigned int		ip_dst;
-	int					olsr_type;
-	int					olsr_neigh;
-	int					olsr_tc;
 };
 
 int

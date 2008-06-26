@@ -6,6 +6,11 @@
 #define MEGA	1e6
 #define GIGA	1e9
 
+struct channel_jumper_data {
+	int fd;
+	char* devname;
+};
+
 int
 kira_open_packet_socket(char* devname, 
 		size_t 	bufsize,
@@ -59,5 +64,8 @@ void
 kira_print_freq_value(char *buffer,
 		int	buflen,
 		double freq);
+
+void 
+kira_jump_channels(void *thread_data);
 
 #endif /*SNIFF_H_*/
