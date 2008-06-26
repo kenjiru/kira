@@ -1,6 +1,6 @@
+NAME=kira
 LIBS=-lpthread
 OBJS=kira.o sniff.o parse.o util.o ieee80211_util.o
-NAME=kira
 # this Makefile is for OpenWrt build
 all:kira
 
