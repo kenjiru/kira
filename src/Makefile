@@ -4,7 +4,7 @@ OBJS=kira.o sniff.o parse.o util.o ieee80211_util.o
 # this Makefile is for OpenWrt build
 all:kira
 
-kira: kira.o sniff.o parse.o util.o ieee80211_util.o
+kira: $(OBJS)
 	$(CC) $(LDFLAGS) -o kira $(OBJS) $(LIBS)
 
 kira.o:
