@@ -34,7 +34,7 @@ kira_parse_packet(unsigned char* buf,
 	if (arphrd == ARPHRD_IEEE80211 ||
 	    arphrd == ARPHRD_IEEE80211_PRISM ||
 	    arphrd == ARPHRD_IEEE80211_RADIOTAP) {
-		DEBUG("before parse 80211 len: %d\n", len);
+//		DEBUG("before parse 80211 len: %d\n", len);
 		len = kira_parse_80211_header(&buf, len);
 		if (len < 0) // couldnt parse 
 			return 0;
@@ -113,14 +113,14 @@ kira_parse_prism_header(unsigned char** buf,
 		current_packet.phy_flags |= PHY_FLAG_G;
 	/* always assume shortpre */
 	current_packet.phy_flags |= PHY_FLAG_SHORTPRE;
-
+/*
 	DEBUG("devname: %s\n", ph->devname);
 	DEBUG("signal: %d -> %d\n", ph->signal.data, current_packet.signal);
 	DEBUG("noise: %d -> %d\n", ph->noise.data, current_packet.noise);
 	DEBUG("rate: %d\n", ph->rate.data);
 	DEBUG("rssi: %d\n", ph->rssi.data);
 	DEBUG("*** SNR %d\n", current_packet.snr);
-
+*/
 	*buf = *buf + sizeof(wlan_ng_prism2_header);
 	return len - sizeof(wlan_ng_prism2_header);
 }
@@ -136,7 +136,7 @@ kira_parse_radiotap_header(unsigned char** buf,
 
 	DEBUG("RADIOTAP HEADER\n");
 
-	DEBUG("len: %d\n", len);
+//	DEBUG("len: %d\n", len);
 
 	if (len < sizeof(struct ieee80211_radiotap_header))
 		return -1;
@@ -259,12 +259,12 @@ kira_parse_radiotap_header(unsigned char** buf,
 		else
 			current_packet.rate = 2;
 	}
-
+/*
 	DEBUG("\nrate: %d\n", current_packet.rate);
 	DEBUG("signal: %d\n", current_packet.signal);
 	DEBUG("noise: %d\n", current_packet.noise);
 	DEBUG("snr: %d\n", current_packet.snr);
-
+*/
 	*buf = *buf + rh->it_len;
 	return len - rh->it_len;
 }
@@ -292,7 +292,7 @@ kira_parse_80211_header(unsigned char** buf,
 	current_packet.len = len;
 	current_packet.wlan_type = (wh->frame_control & (IEEE80211_FCTL_FTYPE | IEEE80211_FCTL_STYPE));
 
-	DEBUG("wlan_type %x - type %x - stype %x\n", wh->frame_control, wh->frame_control & IEEE80211_FCTL_FTYPE, wh->frame_control & IEEE80211_FCTL_STYPE );
+//	DEBUG("wlan_type %x - type %x - stype %x\n", wh->frame_control, wh->frame_control & IEEE80211_FCTL_FTYPE, wh->frame_control & IEEE80211_FCTL_STYPE );
 
 	DEBUG("%s\n", get_packet_type_name(wh->frame_control));
 
@@ -367,7 +367,7 @@ kira_parse_80211_header(unsigned char** buf,
 			current_packet.wlan_tsf = whm->u.beacon.timestamp;
 			kira_ieee802_11_parse_elems(whm->u.beacon.variable,
 				len - sizeof(struct ieee80211_mgmt) - 4 /* FCS */, &current_packet);
-			DEBUG("ESSID %s \n", current_packet.wlan_essid );
+			printf("ESSID %s \n", current_packet.wlan_essid );
 			DEBUG("CHAN %d \n", current_packet.wlan_channel );
 			if (whm->u.beacon.capab_info & WLAN_CAPABILITY_IBSS)
 				current_packet.wlan_mode = WLAN_MODE_IBSS;
@@ -382,7 +382,7 @@ kira_parse_80211_header(unsigned char** buf,
 			current_packet.wlan_tsf = whm->u.beacon.timestamp;
 			kira_ieee802_11_parse_elems(whm->u.beacon.variable,
 				len - sizeof(struct ieee80211_mgmt) - 4 /* FCS */, &current_packet);
-			DEBUG("ESSID %s \n", current_packet.wlan_essid );
+			printf("ESSID %s \n", current_packet.wlan_essid );
 			DEBUG("CHAN %d \n", current_packet.wlan_channel );
 			if (whm->u.beacon.capab_info & WLAN_CAPABILITY_IBSS)
 				current_packet.wlan_mode = WLAN_MODE_IBSS;

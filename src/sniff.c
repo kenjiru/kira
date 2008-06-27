@@ -308,7 +308,7 @@ kira_jump_channels(void *thread_data)
 	
 	// schimbam canalele
 	while(1) {
-		DEBUG("schimbam canalul %d\n", channel);
+		printf("schimbam canalul %d\n", channel);
 		// incrementam canalul
 		pthread_mutex_lock(&cj_mu);
 		if(current_channel < num_channels)

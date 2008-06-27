@@ -19,6 +19,11 @@ struct packet_info current_packet;
 short current_channel;
 pthread_mutex_t cj_mu = PTHREAD_MUTEX_INITIALIZER;
 
+void 
+kira_print_packet_info(unsigned char* ign_sa, 
+		unsigned char* ign_da, 
+		unsigned char* ign_bssid);
+
 int
 main(int argc, char** argv)
 {
@@ -34,10 +39,11 @@ main(int argc, char** argv)
 	short cj_enabled = 1;
 	short default_channel = 0;
 	short print_channels = 0;
+	unsigned char ign_sa[MAC_LEN], ign_da[MAC_LEN], ign_bssid[MAC_LEN];
 	
 	DEBUG("modul DEBUG activat\n");
 	
-	while((c = getopt(argc, argv, "hpc:i:")) > 0) {
+	while((c = getopt(argc, argv, "hpc:i:d:s:b:")) > 0) {
 		switch (c) {
 			case 'p':
 				print_channels = 1;
@@ -48,14 +54,29 @@ main(int argc, char** argv)
 			case 'c':
 				default_channel = atoi(optarg);
 				break;
+			case 'd':
+				convert_string_to_mac(optarg, ign_da);
+				printf("ignore DA %s\n", ether_sprintf(ign_da));
+				break;
+			case 's':
+				convert_string_to_mac(optarg, ign_sa);
+				printf("ignore SA %s\n", ether_sprintf(ign_sa));
+				break;
+			case 'b':
+				convert_string_to_mac(optarg, ign_bssid);
+				printf("ignore BSSID %s\n", ether_sprintf(ign_bssid));
+				break;
 			case 'h':
 			default:
-				printf("Utilizare: %s [-h] [-f] [-i interfata] [-c canal]\n\n"
+				printf("Utilizare: %s [-h] [-f] [-i interfata] [-c canal] [-d MAC] [-s MAC] [-b MAC]\n\n"
 					"Optiuni (valorile implicite):\n"
 					"  -h\t\tacest mesaj de ajutor\n"
 					"  -p\t\tafiseaza canalele suportate de placa\n"
 					"  -i <interfata>\tinterfata (wlan0)\n"
 					"  -c <canal>\tscaneaza doar canalul\n"
+					"  -d <MAC>\tignora MAC-ul destinatie\n"
+					"  -s <MAC>\tignora MAC-ul sursa\n"
+					"  -b <MAC>\tignora BSSID\n"
 					"\n",
 					argv[0]);
 				exit(0);
@@ -102,7 +123,44 @@ main(int argc, char** argv)
 			DEBUG("nu am putut parsa pachetul!\n");
 			continue;
 		}
+		
+		// afisam informatii despre pachet
+		kira_print_packet_info(ign_sa, ign_da, ign_bssid);
+		
+		DEBUG("\n");
 	}
 	
 	return 0;
+}
+
+void 
+kira_print_packet_info(unsigned char* ign_sa, 
+		unsigned char* ign_da, 
+		unsigned char* ign_bssid)
+{
+	// verific daca trebuie sa ignor vre-un pachet
+	if((ign_sa != NULL && current_packet.wlan_src != NULL && memcmp(current_packet.wlan_src,ign_sa, MAC_LEN) == 0) ||
+		(ign_da != NULL && current_packet.wlan_dst != NULL && memcmp(current_packet.wlan_dst,ign_da, MAC_LEN) == 0) || 
+		(ign_bssid != NULL && current_packet.wlan_bssid != NULL && memcmp(current_packet.wlan_bssid,ign_bssid, MAC_LEN) == 0)) {
+		return;
+	}
+	
+	// afiseaza informatii despre pachet
+	printf("tipul pachetului: %s \n", 
+		get_packet_type_name(current_packet.wlan_type));
+//	if(current_packet.wlan_essid != NULL)
+//		printf("ESSID %s \n", current_packet.wlan_essid);
+	if(current_packet.wlan_channel != NULL)
+		printf("CHAN %d \n", current_packet.wlan_channel);
+	if(current_packet.wlan_src != NULL)
+		printf("SA    %s\n", ether_sprintf(current_packet.wlan_src));
+	if(current_packet.wlan_dst != NULL)
+		printf("DA    %s\n", ether_sprintf(current_packet.wlan_dst));
+	if(current_packet.wlan_bssid != NULL)
+		printf("BSSID    %s\n", ether_sprintf(current_packet.wlan_bssid));
+	if(current_packet.ip_src != NULL)
+		printf("IP SRC	%s\n", ip_sprintf(current_packet.ip_src));
+	if(current_packet.ip_dst != NULL)
+		printf("IP DST	%s\n", ip_sprintf(current_packet.ip_dst));
+	printf("\n");
 }

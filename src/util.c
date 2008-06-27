@@ -85,6 +85,8 @@ const char*
 ether_sprintf(const unsigned char *mac)
 {
 	static char etherbuf[18];
+	if(mac == NULL)
+		return NULL;
 	snprintf(etherbuf, sizeof(etherbuf), "%02x:%02x:%02x:%02x:%02x:%02x",
 		mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 	return etherbuf;
@@ -96,6 +98,9 @@ ip_sprintf(const unsigned int ip)
 {
 	static char ipbuf[18];
 	unsigned char* cip = (unsigned char*)&ip;
+	
+	if(ip == NULL)
+		return NULL;
 	snprintf(ipbuf, sizeof(ipbuf), "%d.%d.%d.%d",
 		cip[0], cip[1], cip[2], cip[3]);
 	return ipbuf;
