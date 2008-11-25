@@ -6,7 +6,6 @@
 #include <sys/socket.h>
 #include <netpacket/packet.h>
 #include <net/ethernet.h>
-#include <net/if.h>
 #include <arpa/inet.h>
 #include <linux/wireless.h>
 #include <err.h>
