@@ -70,13 +70,13 @@ main(int argc, char** argv)
 			default:
 				printf("Utilizare: %s [-h] [-f] [-i interfata] [-c canal] [-d MAC] [-s MAC] [-b MAC]\n\n"
 					"Optiuni (valorile implicite):\n"
-					"  -h\t\tacest mesaj de ajutor\n"
-					"  -p\t\tafiseaza canalele suportate de placa\n"
-					"  -i <interfata>\tinterfata (wlan0)\n"
-					"  -c <canal>\tscaneaza doar canalul\n"
-					"  -d <MAC>\tignora MAC-ul destinatie\n"
-					"  -s <MAC>\tignora MAC-ul sursa\n"
-					"  -b <MAC>\tignora BSSID\n"
+					"  -h\t\t acest mesaj de ajutor\n"
+					"  -p\t\t afiseaza canalele suportate de placa\n"
+					"  -i <interfata>\t interfata (wlan0)\n"
+					"  -c <canal>\t scaneaza doar canalul\n"
+					"  -d <MAC>\t ignora MAC-ul destinatie\n"
+					"  -s <MAC>\t ignora MAC-ul sursa\n"
+					"  -b <MAC>\t ignora BSSID\n"
 					"\n",
 					argv[0]);
 				exit(0);
@@ -85,8 +85,8 @@ main(int argc, char** argv)
 	}
 	
 	printf("Setarile sunt:\n");
-	printf("\tcanalul: %d\n", default_channel);
-	printf("\tinterfata: %s\n\n", devname);
+	printf("\t canalul: %d\n", default_channel);
+	printf("\t interfata: %s\n\n", devname);
 	
 	fd = kira_open_packet_socket(devname, sizeof(buffer), recv_buffer_size);
 	if (fd < 0)
@@ -125,7 +125,9 @@ main(int argc, char** argv)
 		}
 		
 		// afisam informatii despre pachet
+#if !DO_DEBUG
 		kira_print_packet_info(ign_sa, ign_da, ign_bssid);
+#endif
 		
 		DEBUG("\n");
 	}
@@ -148,6 +150,7 @@ kira_print_packet_info(unsigned char* ign_sa,
 	// afiseaza informatii despre pachet
 	printf("tipul pachetului: %s \n", 
 		get_packet_type_name(current_packet.wlan_type));
+	// TODO: sa afisez ESSID-ul
 //	if(current_packet.wlan_essid != NULL)
 //		printf("ESSID %s \n", current_packet.wlan_essid);
 	if(current_packet.wlan_channel != NULL)
